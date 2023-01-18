@@ -8,7 +8,6 @@ const toggleFavorite = (id: number) => {
   }
 
   localStorage.setItem('favorite', JSON.stringify(favorite))
-  console.log(favorite)
 }
 
 const pokemonInFavorite = (id: number): boolean => {
@@ -20,4 +19,12 @@ const pokemonInFavorite = (id: number): boolean => {
   return favorite.includes(id)
 }
 
-export { toggleFavorite, pokemonInFavorite }
+const listFavorite = (): number[] => {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  return JSON.parse(localStorage.getItem('favorite') ?? '[]')
+}
+
+export { toggleFavorite, pokemonInFavorite, listFavorite }
