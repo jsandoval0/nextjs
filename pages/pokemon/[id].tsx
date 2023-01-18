@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { Pokemon } from '../../interfaces'
 import { pokeApi } from '../../api'
 import { Button, Card, Container, Grid, Image, Text } from '@nextui-org/react'
 import { Layout } from '../../components/layouts'
+import { pokemonInFavorite, toggleFavorite } from '../../utils'
 
 interface Props {
   pokemon: Pokemon
@@ -11,6 +13,14 @@ interface Props {
 const PokemonPage: NextPage<Props> = ({ pokemon }) => {
   const init: string = pokemon.name.charAt(0).toLocaleUpperCase()
   const title = `${init}${pokemon.name.substring(1)}`
+
+  const [isInFavorite, setIsInFavorite] = useState(pokemonInFavorite(pokemon.id))
+
+  const onToggleFavorite = () => {
+    toggleFavorite(pokemon.id)
+    setIsInFavorite(pokemonInFavorite(pokemon.id))
+  }
+
   return (
     <Layout title={title}>
       <Grid.Container css={{ marginTop: '5px' }} gap={2}>
@@ -24,8 +34,12 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
             />
 
             <Container direction='row' display='flex' justify='space-between' >
-              <Text h2 css={{ textGradient: '45deg, $blue600 -20%, $pink600 50%' }}>{pokemon.abilities[0].ability.name.toLocaleUpperCase()}</Text>
-              <Text h2 css={{ textGradient: '45deg, $green600 -20%, $yellow600 50%' }}>{pokemon.abilities[1].ability.name.toLocaleUpperCase()}</Text>
+              <Text h2 css={{ textGradient: '45deg, $blue600 -20%, $pink600 50%' }}>
+                {pokemon.abilities[0].ability.name.toLocaleUpperCase()}
+              </Text>
+              <Text h2 css={{ textGradient: '45deg, $green600 -20%, $yellow600 50%' }}>
+                {pokemon.abilities.length === 2 ? pokemon.abilities[1].ability.name.toLocaleUpperCase() : 'No-ability'}
+              </Text>
             </Container>
           </Card>
         </Grid>
@@ -33,7 +47,9 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
           <Card>
             <Card.Header css={{ display: 'flex', justifyContent: 'space-between' }} >
               <Text h1 transform='capitalize'>{pokemon.name}</Text>
-              <Button color='gradient' ghost>Guardar en Favoritos</Button>
+              <Button color='gradient' ghost={!isInFavorite} onPress={onToggleFavorite}>
+                {isInFavorite ? 'Eliminar de Favoritos' : 'Guardar en Favoritos'}
+              </Button>
             </Card.Header>
             <Card.Body>
               <Text size={30} >Sprites:</Text>
@@ -72,9 +88,9 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
-  const pokemon151 = [...Array(151)].map((value, i) => `${i + 1}`)
+  const pokemon251 = [...Array(251)].map((value, i) => `${i + 1}`)
   return {
-    paths: pokemon151.map((id) => ({
+    paths: pokemon251.map((id) => ({
       params: { id }
     })),
     fallback: false
