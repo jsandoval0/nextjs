@@ -5,6 +5,7 @@ import { pokeApi } from '../../api'
 import { Button, Card, Container, Grid, Image, Text } from '@nextui-org/react'
 import { Layout } from '../../components/layouts'
 import { pokemonInFavorite, toggleFavorite } from '../../utils'
+import confetti from 'canvas-confetti'
 
 interface Props {
   pokemon: Pokemon
@@ -19,6 +20,24 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
   const onToggleFavorite = () => {
     toggleFavorite(pokemon.id)
     setIsInFavorite(pokemonInFavorite(pokemon.id))
+  }
+
+  function randomInRange (min: number, max: number) {
+    return Math.random() * (max - min) + min
+  }
+
+  if (isInFavorite) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    confetti({
+      zIndex: 999,
+      particleCount: 100,
+      spread: 160,
+      angle: randomInRange(55, 125),
+      origin: {
+        x: 0.5,
+        y: 0.5
+      }
+    })
   }
 
   return (
