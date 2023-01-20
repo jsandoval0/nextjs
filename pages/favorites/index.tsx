@@ -1,17 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Layout } from '../../components/layouts'
-import { NextPage } from 'next'
-import { Pokemon } from '../../interfaces/pokemon-full'
 import NoFavorite from './../../components/noFavorite/NoFavorite'
 import FavoriteContainer from '../../components/favoriteContainer/FavoriteContainer'
 import { listFavorite } from '../../utils'
 
-interface Props {
-  pokemon: Pokemon
-}
+const Index = () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [favoritePokemon, setfavoritePokemon] = useState<number[]>([1])
 
-const index: NextPage<Props> = () => {
-  const [favoritePokemon, setfavoritePokemon] = useState<number[]>(listFavorite())
+  useEffect(() => {
+    setfavoritePokemon(listFavorite())
+  }, [])
 
   return (
     <Layout title='Favoritos'>
@@ -24,4 +23,4 @@ const index: NextPage<Props> = () => {
   )
 }
 
-export default index
+export default Index

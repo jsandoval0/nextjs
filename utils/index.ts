@@ -1,2 +1,2 @@
-export * from './index'
 export * from './localFavorites'
+export * from './getPokemonInfo'

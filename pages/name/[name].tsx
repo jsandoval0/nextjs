@@ -1,49 +1,45 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
-import { Pokemon } from '../../interfaces'
 import { Button, Card, Container, Grid, Image, Text } from '@nextui-org/react'
 import { Layout } from '../../components/layouts'
-import { pokemonInFavorite, toggleFavorite } from '../../utils'
+import { Pokemon } from '../../interfaces/pokemon-full'
+import { getPokemonInfo, pokemonInFavorite, toggleFavorite } from '../../utils'
 import confetti from 'canvas-confetti'
-import { getPokemonInfo } from '../../utils/getPokemonInfo'
+import { pokeApi } from '../../api'
+import { PokemonListResponse } from '../../interfaces'
 
 interface Props {
   pokemon: Pokemon
 }
 
-const PokemonPage: NextPage<Props> = ({ pokemon }) => {
+const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
   const init: string = pokemon.name.charAt(0).toLocaleUpperCase()
   const title = `${init}${pokemon.name.substring(1)}`
 
-  const [isInFavorite, setIsInFavorite] = useState(false)
+  const [isInFavorite, setIsInFavorite] = useState(pokemonInFavorite(pokemon.id))
 
-  useEffect(() => {
+  const onToggleFavorite = () => {
+    toggleFavorite(pokemon.id)
     setIsInFavorite(pokemonInFavorite(pokemon.id))
-  }, [pokemon.id])
+  }
 
   function randomInRange (min: number, max: number) {
     return Math.random() * (max - min) + min
   }
 
-  const onToggleFavorite = () => {
-    toggleFavorite(pokemon.id)
-    setIsInFavorite(pokemonInFavorite(pokemon.id))
-
-    if (!isInFavorite) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      confetti({
-        zIndex: 999,
-        particleCount: 100,
-        spread: 160,
-        angle: randomInRange(55, 125),
-        origin: {
-          x: 0.5,
-          y: 0.5
-        }
-      })?.catch()
-    }
+  if (isInFavorite) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    confetti({
+      zIndex: 999,
+      particleCount: 100,
+      spread: 160,
+      angle: randomInRange(55, 125),
+      origin: {
+        x: 0.5,
+        y: 0.5
+      }
+    })
   }
-
   return (
     <Layout title={title}>
       <Grid.Container css={{ marginTop: '5px' }} gap={2}>
@@ -111,23 +107,26 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
-  const pokemon251 = [...Array(251)].map((value, i) => `${i + 1}`)
+  const { data } = await pokeApi.get<PokemonListResponse>('/pokemon?limit=51')
+
+  const pokemonsName = data.results.map(pokemon => pokemon.name)
+
   return {
-    paths: pokemon251.map((id) => ({
-      params: { id }
+    paths: pokemonsName.map(name => ({
+      params: { name }
     })),
     fallback: false
   }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { id } = params as { id: string }
+  const { name } = params as { name: string }
 
   return {
     props: {
-      pokemon: await getPokemonInfo(id)
+      pokemon: await getPokemonInfo(name)
     }
   }
 }
 
-export default PokemonPage
+export default PokemonByNamePage
